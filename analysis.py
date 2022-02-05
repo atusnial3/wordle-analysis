@@ -19,6 +19,7 @@ import cProfile
 import pstats
 
 ALL_WORDS = GUESSES + ANSWERS
+N_JOBS = 6
 
 @contextlib.contextmanager
 def tqdm_joblib(tqdm_object):
@@ -343,7 +344,7 @@ def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS, filename='best_guess.
         ('guess', 10.234, 15, 6) <- (guess, mean, max, num_solved)
     """
     with tqdm_joblib(tqdm(desc='calc', total=len(guesses))) as progress_bar:
-        x = Parallel(n_jobs=-1)(
+        x = Parallel(n_jobs=N_JOBS)(
                 delayed(elim_helper)(guess, word_set=answers)
                 for guess in guesses)
     data = sorted(x, key=lambda y: y[1])
@@ -383,7 +384,7 @@ def optimal_wordle(answer_set=ANSWERS):
         guess_ranks = []
         start_time = time.time()
         with tqdm_joblib(tqdm(desc='calc', total=len(ALL_WORDS))) as progress_bar:
-            guess_ranks = Parallel(n_jobs=6)(
+            guess_ranks = Parallel(n_jobs=N_JOBS)(
                 delayed(elim_helper)(guess, ls, possible)
                 for guess in ALL_WORDS)
         guess_ranks = sorted(guess_ranks, key=lambda y: y[1])
@@ -425,7 +426,7 @@ def best_second_word_by_pattern(first_guess='roate', filename='best_second_word_
     # best_words = [rank_second_guess(pattern, first_guess)
     #     for pattern in tqdm(patterns)]
     with tqdm_joblib(tqdm(total=len(patterns))) as progress_bar:
-        best_words = Parallel(n_jobs=6)(
+        best_words = Parallel(n_jobs=N_JOBS)(
             delayed(rank_second_guess)(pattern, first_guess)
             for pattern in patterns)
     best_words = sorted(best_words, key=lambda y: y[5])
@@ -442,7 +443,7 @@ def rank_second_guess(pattern, first_guess):
         guess_ranks = [elim_helper(guess, existing, possible)
             for guess in ALL_WORDS]
         # with tqdm_joblib(tqdm(total=len(ALL_WORDS), leave=False, desc=pattern)) as progress_bar:
-        #     guess_ranks = Parallel(n_jobs=6)(
+        #     guess_ranks = Parallel(n_jobs=N_JOBS)(
         #         delayed(elim_helper)(guess, existing, possible)
         #         for guess in ALL_WORDS)
         guess_ranks = sorted(guess_ranks, key=lambda y: y[1])
@@ -458,10 +459,10 @@ def main():
     # data = best_second_word_by_pattern()
     # optimal_wordle(answer_set=ANSWERS)
     start_time = time.time()
-    pprint(elim_helper('roate'))
+    words = best_starting_word()
+    # pprint(elim_helper('roate'))
     print(f'elapsed: {time.time() - start_time}')
     # best_second_word_by_pattern()
-    # words = best_starting_word()
     # words = best_starting_word(answers=EVIL_ANSWERS, filename='best_guess_evil.csv')
 if __name__ == '__main__':
     main()
