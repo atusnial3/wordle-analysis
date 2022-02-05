@@ -15,6 +15,8 @@ from joblib import Parallel, delayed
 import contextlib
 import joblib
 import csv
+import cProfile
+import pstats
 
 ALL_WORDS = GUESSES + ANSWERS
 
@@ -39,7 +41,7 @@ def tqdm_joblib(tqdm_object):
 
 # returns all possible patterns of length k with characters from the given set
 # recursively
-def possible_patterns(set=set(['B', 'Y', 'G']), k=5):
+def possible_patterns(set=['B', 'Y', 'G'], k=5):
     """Returns a list of all possible length k patterns built from characters in set.
 
     Args:
@@ -314,6 +316,11 @@ def average_elimination(guesses, existing=None, word_set=ANSWERS):
                     raise ValueError('guesses must be of type list or str')
     return ret
 
+def elim_helper(guesses, existing=None, word_set=ANSWERS):
+    """Computes statistics for the array output by average_elimination."""
+    arr = average_elimination(guesses, existing, word_set)
+    return guesses, np.mean(arr), np.max(arr), Counter(arr)[1]
+
 def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS, filename='best_guess.csv'):
     """Ranks possible first guesses in Wordle by average number of words eliminated.
 
@@ -336,7 +343,9 @@ def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS, filename='best_guess.
         ('guess', 10.234, 15, 6) <- (guess, mean, max, num_solved)
     """
     with tqdm_joblib(tqdm(desc='calc', total=len(guesses))) as progress_bar:
-        x = Parallel(n_jobs=-1)(delayed(process)(guess, word_set=answers) for guess in guesses)
+        x = Parallel(n_jobs=-1)(
+                delayed(elim_helper)(guess, word_set=answers)
+                for guess in guesses)
     data = sorted(x, key=lambda y: y[1])
 
     with open(filename, 'w', newline='') as out:
@@ -345,11 +354,6 @@ def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS, filename='best_guess.
         for row in data:
             csv_out.writerow([row[0], row[1], row[2]])
     return data
-
-def process(guesses, existing=None, word_set=ANSWERS):
-    """Computes statistics for the array output by average_elimination."""
-    arr = average_elimination(guesses, existing, word_set)
-    return guesses, np.mean(arr), np.max(arr), Counter(arr)[1]
 
 def optimal_wordle(answer_set=ANSWERS):
     """CLI to play a game of Wordle optimally, for use while playing Wordle.
@@ -377,10 +381,14 @@ def optimal_wordle(answer_set=ANSWERS):
 
         print('Evaluating possible guesses:')
         guess_ranks = []
+        start_time = time.time()
         with tqdm_joblib(tqdm(desc='calc', total=len(ALL_WORDS))) as progress_bar:
-            guess_ranks = Parallel(n_jobs=-1)(delayed(process)(guess, ls, possible) for guess in ALL_WORDS)
+            guess_ranks = Parallel(n_jobs=6)(
+                delayed(elim_helper)(guess, ls, possible)
+                for guess in ALL_WORDS)
         guess_ranks = sorted(guess_ranks, key=lambda y: y[1])
-        print('Done.')
+        elapsed = time.time() - start_time
+        print(f'Done. {elapsed} seconds')
         if len(guess_ranks) >= 10:
             print('The top guesses by average entropy are:')
             pprint(guess_ranks[:10])
@@ -414,34 +422,46 @@ def best_second_word_by_pattern(first_guess='roate', filename='best_second_word_
         ('phons', 2.368, 5.0, 8, 'YYBBG') <- (guess, mean, max, num_solved, pattern)
     """
     patterns = possible_patterns()
-    best_words = []
-    for pattern in tqdm(patterns):
-        existing = [{'pattern' : list(pattern), 'guess' : first_guess}]
-        possible = dumb_entropy(existing)
-        if len(possible) > 1:
-            with tqdm_joblib(tqdm(desc=pattern, total=len(ALL_WORDS), leave=False)) as progress_bar:
-                guess_ranks = Parallel(n_jobs=-1)(delayed(process)(guess, existing, possible) for guess in ALL_WORDS)
-            guess_ranks = sorted(guess_ranks, key=lambda y: y[1])
-            best_words.append((guess_ranks[0][0], guess_ranks[0][1], guess_ranks[0][2], guess_ranks[0][3], pattern))
-        elif len(possible) == 1:
-            best_words.append((possible[0], 0, 0, pattern))
-        else:
-            best_words.append(('N/A', 0, 0, pattern))
+    # best_words = [rank_second_guess(pattern, first_guess)
+    #     for pattern in tqdm(patterns)]
+    with tqdm_joblib(tqdm(total=len(patterns))) as progress_bar:
+        best_words = Parallel(n_jobs=6)(
+            delayed(rank_second_guess)(pattern, first_guess)
+            for pattern in patterns)
+    best_words = sorted(best_words, key=lambda y: y[5])
+    pprint(best_words)
 
-    pprint(sorted(best_words, key=lambda x: x[1]))
-    # with open('best_second_word_by_pattern', 'w', newline='') as out:
-    #     csv_out = csv.writer(out)
     return best_words
 
+def rank_second_guess(pattern, first_guess):
+    """Helper that ranks second guesses for a given pattern and first guess."""
+    existing = [{'pattern' : list(pattern), 'guess' : first_guess}]
+    possible = dumb_entropy(existing)
+    if len(possible) > 1:
+        start_time = time.time()
+        guess_ranks = [elim_helper(guess, existing, possible)
+            for guess in ALL_WORDS]
+        # with tqdm_joblib(tqdm(total=len(ALL_WORDS), leave=False, desc=pattern)) as progress_bar:
+        #     guess_ranks = Parallel(n_jobs=6)(
+        #         delayed(elim_helper)(guess, existing, possible)
+        #         for guess in ALL_WORDS)
+        guess_ranks = sorted(guess_ranks, key=lambda y: y[1])
+        elapsed = time.time() - start_time
+        return (guess_ranks[0][0], guess_ranks[0][1], guess_ranks[0][2], guess_ranks[0][3], pattern, elapsed)
+    elif len(possible) == 1:
+        return (possible[0], 0, 0, 0, pattern, 0)
+    else:
+        return ('N/A', 0, 0, 0, pattern, 0)
 
 def main():
-    # pprint(np.unique([x[0] for x in BEST_AFTER_ROATE], return_counts=True))
     # data = evaluate_two_guess()
     # data = best_second_word_by_pattern()
-    optimal_wordle(answer_set=ANSWERS)
+    # optimal_wordle(answer_set=ANSWERS)
+    start_time = time.time()
+    pprint(elim_helper('roate'))
+    print(f'elapsed: {time.time() - start_time}')
     # best_second_word_by_pattern()
     # words = best_starting_word()
     # words = best_starting_word(answers=EVIL_ANSWERS, filename='best_guess_evil.csv')
-    # pprint(words[:10])
 if __name__ == '__main__':
     main()
