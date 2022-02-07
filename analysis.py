@@ -28,7 +28,7 @@ from tqdm import tqdm
 
 PATTERNS_DICT = dict()
 
-def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS, filename='best_guess_grid.csv'):
+def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS, filename='outputs/best_guess_grid.csv'):
     """Ranks possible first guesses in Wordle by average number of words eliminated.
 
     Computes the number of words left in the search space after each guess for
@@ -59,7 +59,7 @@ def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS, filename='best_guess_
             csv_out.writerow(row)
     return guess_ranks
 
-def best_second_word_by_pattern(first_guess='roate', filename='best_second_word_by_pattern.csv'):
+def best_second_word_by_pattern(first_guess='roate', filename='outputs/best_second_word_by_pattern.csv'):
     """Computes the best second guess for each pattern given some first guess.
 
     Also writes the list of words and patterns to a csv file with filename

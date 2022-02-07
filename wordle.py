@@ -157,7 +157,6 @@ def play_wordle(answer_set=ANSWERS):
     Args:
         answer_set: A list of strings containing the possible Wordle answers.
     """
-    ls = [] # list of dict [{pattern : pattern, guess : guess}]
     possible = answer_set
     while len(possible) > 1:
         guess = input('Input your guess:\n')
