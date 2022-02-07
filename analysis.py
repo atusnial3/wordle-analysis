@@ -124,8 +124,8 @@ def wordle_solver(target='skill', verbose=False, answer_set=ANSWERS, first_guess
 
 def main():
     start_time = time.time()
-    best_starting_word()
-    best_second_word_by_pattern()
+    # best_starting_word()
+    # best_second_word_by_pattern()
     wordle_solver(verbose=True)
     elapsed = time.time() - start_time
     print(f'{elapsed} seconds elapsed')
