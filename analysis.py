@@ -16,8 +16,6 @@ Typical usage example:
     num_guesses = wordle_solver(target='funky', verbose=True)
 """
 
-
-
 from data import ANSWERS, ALL_WORDS
 from patterns_grid import generate_pattern_grid, load_pattern_grid, get_pattern_grid
 from util import possible_patterns
@@ -25,6 +23,7 @@ from wordle import rank_next_guess, filter_words, score
 import time
 import csv
 from tqdm import tqdm
+from pprint import pprint
 
 PATTERNS_DICT = dict()
 
@@ -124,9 +123,10 @@ def wordle_solver(target='skill', verbose=False, answer_set=ANSWERS, first_guess
 
 def main():
     start_time = time.time()
-    # best_starting_word()
+    ranks = best_starting_word()
+    pprint(ranks[:100])
     # best_second_word_by_pattern()
-    wordle_solver(verbose=True)
+    # wordle_solver(verbose=True)
     elapsed = time.time() - start_time
     print(f'{elapsed} seconds elapsed')
 
