@@ -21,6 +21,7 @@ from util import count_unique_by_row, pattern_to_num
 from pprint import pprint
 import numpy as np
 import time
+import operator as op
 
 PATTERN_GRID = dict()
 
@@ -115,7 +116,6 @@ def filter_words(guess, pattern, word_set=ANSWERS):
     patterns = get_pattern_grid([guess], word_set).flatten()
     return list(np.array(word_set)[patterns == num])
 
-
 def rank_next_guess(word_set=ALL_WORDS, possible=ANSWERS):
     """Ranks the possible next guesses from the word_set.
 
@@ -145,7 +145,15 @@ def rank_next_guess(word_set=ALL_WORDS, possible=ANSWERS):
     averages = np.sum(unq, axis=1) / np.count_nonzero(unq, axis=1)
     worst_case = np.max(unq, axis=1)
     num_solved = np.count_nonzero(unq == 1, axis=1)
-    guess_ranks = sorted(zip(ALL_WORDS, list(averages), list(worst_case), list(num_solved)), key=lambda x: x[1])
+    guess_ranks = list(zip(ALL_WORDS, list(averages), list(worst_case), list(num_solved)))
+    # sort 3 times - tertiary, secondary, primary. Have to do like this because
+    # we need to sort by num_solved in reverse order
+    # tertiary sort - worst_case
+    guess_ranks.sort(key=op.itemgetter(2))
+    # secondary sort - num_solved
+    guess_ranks.sort(key=op.itemgetter(3), reverse=True)
+    # primary sort - average left
+    guess_ranks.sort(key=op.itemgetter(1))
     return guess_ranks
 
 def play_wordle(answer_set=ANSWERS):
