@@ -124,11 +124,11 @@ def logistic(x, k=3.5, midpoint=3, L=1):
         L / (1 + e^(-k(x - midpoint)))
 
     Args:
-        k: a float determining the steepness of the sigmoid curve - higher
+        k: A float determining the steepness of the sigmoid curve - higher
             values -> steeper curve
-        midpoint: a float determining the midpoint of the curve (the x values
+        midpoint: A float determining the midpoint of the curve (the x values
             for which logistic(x) = 0.5)
-        L: a float determining the scale of the sigmoid curve - L is the upper
+        L: A float determining the scale of the sigmoid curve - L is the upper
             bound of the function as x -> \infty
     """
     return L / (1 + math.exp((-1 * k) * (x - midpoint)))
