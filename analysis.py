@@ -16,7 +16,7 @@ Typical usage example:
     num_guesses = wordle_solver(target='funky', verbose=True)
 """
 
-from data import ANSWERS, ALL_WORDS
+from data import ANSWERS, ALL_WORDS, TOP_WORDS
 from patterns_grid import generate_pattern_grid, load_pattern_grid, get_pattern_grid
 from util import possible_patterns
 from wordle import rank_next_guess, filter_words, score
@@ -24,6 +24,7 @@ import time
 import csv
 from tqdm import tqdm
 from pprint import pprint
+import numpy as np
 
 PATTERNS_DICT = dict()
 
@@ -122,13 +123,19 @@ def wordle_solver(target='skill', verbose=False, answer_set=ANSWERS, first_guess
     raise RuntimeError(f'Wrong guess: target {target}, actual {possible}')
 
 def main():
-    start_time = time.time()
-    ranks = best_starting_word()
-    pprint(ranks[:100])
+    # wordle_solver(target='focal', first_guess='jujus', verbose=True)
+    # ranks = best_starting_word()
+    # pprint(ranks[-20:])
     # best_second_word_by_pattern()
-    # wordle_solver(verbose=True)
+    first_guess = 'trace'
+    start_time = time.time()
+    nums = []
+    for answer in tqdm(ANSWERS):
+        n = wordle_solver(target=answer, first_guess='trace', verbose=False)
+        nums.append(n)
+    print(f'Average Guesses: {np.mean(nums)}')
     elapsed = time.time() - start_time
-    print(f'{elapsed} seconds elapsed')
+    print(f'{elapsed} seconds elapsed') 3.5809935205183585
 
 if __name__ == '__main__':
     load_pattern_grid()

@@ -12,7 +12,6 @@ Functions:
 import numpy as np
 import math
 
-
 def possible_patterns(set=['B', 'Y', 'G'], k=5):
     """Return a list of all possible length k patterns built from characters in set.
 
