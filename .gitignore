@@ -1,0 +1,8 @@
+# Analysis Output Files #
+#########################
+outputs/
+
+# OS Generated Files #
+#########################
+__pycache__/
+.idea/
