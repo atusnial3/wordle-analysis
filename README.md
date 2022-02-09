@@ -1,10 +1,11 @@
 # wordle-analysis
 Find optimal strategy for wordle &amp; wordle variants.
 
-To use: clone the repository and install the necessary packages:
+To use: clone the repository and install the necessary packages (using Python version 3.9.x):
   - numpy
   - pandas
   - tqdm
+  - wordfreq
 
 The analysis.py and wordle.py files are scripts that can be run directly. Running wordle.py will open a CLI to play a game of Wordle. There are three functions in analysis.py that can be run, each analyzing some Wordle strategy.
 
