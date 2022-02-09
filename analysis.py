@@ -88,14 +88,20 @@ def best_second_word_by_pattern(first_guess: str = 'trace',
     patterns = possible_patterns()
     best_words = []
     for pattern in tqdm(patterns):
-        poss = filter_words(first_guess, pattern, ALL_WORDS, patterns_dict)
+        poss = filter_words(first_guess, pattern, ANSWERS, patterns_dict)
         if len(poss) > 1:
-            best = rank_next_guess(ALL_WORDS, poss, patterns_dict)[0][0]
-            best_words.append((best, pattern))
+            word, mean, mx, solved = rank_next_guess(ALL_WORDS, poss, patterns_dict)[0]
+            best_words.append((pattern, word, mean, mx, solved))
         elif len(poss) == 1:
-            best_words.append((poss[0], pattern))
+            best_words.append((pattern, poss[0], 1, 1, 1))
         else:
-            best_words.append(('N/A', pattern))
+            best_words.append((pattern, 'N/A', np.nan, np.nan, np.nan))
+    with open(filename, 'w', newline='') as out:
+        csv_out = csv.writer(out)
+        csv_out.writerow(['First Guess:', first_guess])
+        csv_out.writerow(['Pattern', 'Guess', 'Mean Remaining', 'Max Remaining', 'Num Solved'])
+        for row in best_words:
+            csv_out.writerow(row)
     return best_words
 
 
@@ -144,17 +150,17 @@ def wordle_solver(target: str = 'skill',
 
 
 def main():
+    start_time = time.time()
     # wordle_solver(target='focal', first_guess='jujus', verbose=True)
     # ranks = best_starting_word()
     # pprint(ranks[-20:])
-    # best_second_word_by_pattern()
-    first_guess = 'trace'
-    start_time = time.time()
-    nums = []
-    for answer in tqdm(ANSWERS):
-        n = wordle_solver(target=answer, first_guess=first_guess)
-        nums.append(n)
-    print(f'Average Guesses: {np.mean(nums)}')  # 3.5732181425485963
+    _ = best_second_word_by_pattern()
+    # first_guess = 'trace'
+    # nums = []
+    # for answer in tqdm(ANSWERS):
+    #     n = wordle_solver(target=answer, first_guess=first_guess)
+    #     nums.append(n)
+    # print(f'Average Guesses: {np.mean(nums)}')  # 3.5732181425485963
     elapsed = time.time() - start_time
     print(f'{elapsed} seconds elapsed')
 
