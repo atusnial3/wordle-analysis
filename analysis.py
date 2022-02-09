@@ -107,6 +107,7 @@ def best_second_word_by_pattern(first_guess: str = 'trace',
 
 def wordle_solver(target: str = 'skill',
                   verbose: bool = False,
+                  guess_set: list[str] = ALL_WORDS,
                   answer_set: list[str] = ANSWERS,
                   first_guess: str = 'raise',
                   patterns_dict: dict = None) -> int:
@@ -115,6 +116,7 @@ def wordle_solver(target: str = 'skill',
     Args:
         target: The len 5 string the solver is attempting to guess.
         verbose: A boolean determining whether to display the solver's steps.
+        guess_set: The set of possible guesses for the solver to consider.
         answer_set: The set of answers for the solver to consider.
         first_guess: The len 5 string that the solver uses as its first guess.
         patterns_dict: The full patterns dictionary
@@ -144,7 +146,7 @@ def wordle_solver(target: str = 'skill',
         if len(possible) == 1:
             best_guess = possible[0]
         else:
-            guess_ranks = rank_next_guess(ALL_WORDS, possible, patterns_dict)
+            guess_ranks = rank_next_guess(guess_set, possible, patterns_dict)
             best_guess = guess_ranks[0][0]
     raise RuntimeError(f'Wrong guess: target {target}, actual {possible}')
 
@@ -154,13 +156,14 @@ def main():
     # wordle_solver(target='focal', first_guess='jujus', verbose=True)
     # ranks = best_starting_word()
     # pprint(ranks[-20:])
-    _ = best_second_word_by_pattern()
-    # first_guess = 'trace'
-    # nums = []
-    # for answer in tqdm(ANSWERS):
-    #     n = wordle_solver(target=answer, first_guess=first_guess)
-    #     nums.append(n)
-    # print(f'Average Guesses: {np.mean(nums)}')  # 3.5732181425485963
+    # _ = best_second_word_by_pattern()
+    first_guess = 'trace'
+    # n = wordle_solver(target='humor', guess_set=ANSWERS, verbose=False, first_guess=first_guess)
+    nums = []
+    for answer in tqdm(ANSWERS):
+        n = wordle_solver(target='humor', guess_set=ALL_WORDS, verbose=False, first_guess=first_guess)
+        nums.append(n)
+    print(f'Average Guesses: {np.mean(nums)}')  # 3.5732181425485963
     elapsed = time.time() - start_time
     print(f'{elapsed} seconds elapsed')
 
