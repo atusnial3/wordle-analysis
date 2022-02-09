@@ -10,16 +10,18 @@ Functions:
     - logistic - computes the logistic function at x with given parameters
 """
 
+from typing import Generator
 import numpy as np
+from numpy import typing as npt
 import math
 
 
-def possible_patterns(set=['B', 'Y', 'G'], k=5):
+def possible_patterns(char_set: list = None, k: int = 5) -> list[str]:
     """Return a list of all possible length k patterns built from chars in set.
 
     Args:
-        set: The set of characters to build patterns from
-            (default {'B', 'Y', 'G'})
+        char_set: The set of characters to build patterns from
+            (default ['B', 'Y', 'G'] set immutably)
         k: The length of the patterns to build (default 5)
 
     Returns:
@@ -27,20 +29,21 @@ def possible_patterns(set=['B', 'Y', 'G'], k=5):
         is a string of length k.
     """
     ls = []
-    possible_patters_rec(set, "", k, ls)
+    char_set = char_set if char_set else ['B', 'Y', 'G']
+    possible_patters_rec(char_set, "", k, ls)
     return ls
 
 
-def possible_patters_rec(set, word, k, ls):
+def possible_patters_rec(char_set, word, k, ls):
     """Underlying recursive function called by possible_patterns"""
     if k == 0:
         ls.append(word)
         return
-    for char in set:
-        possible_patters_rec(set, word + char, k - 1, ls)
+    for char in char_set:
+        possible_patters_rec(char_set, word + char, k - 1, ls)
 
 
-def chars_to_int_gen(pattern):
+def chars_to_int_gen(pattern: list) -> Generator[int, None, None]:
     """Generator that converts 'B', 'Y', and 'G' to 0, 1, and 2 respectively.
 
     Used as a helper in pattern_to_num.
@@ -60,7 +63,7 @@ def chars_to_int_gen(pattern):
             yield 2
 
 
-def pattern_to_num(pattern):
+def pattern_to_num(pattern: list) -> int:
     """Take in a pattern and return a unique integer corresponding to it.
 
     Uses a ternary expansion to associate a unique ID with each pattern. The
@@ -78,7 +81,7 @@ def pattern_to_num(pattern):
     )
 
 
-def num_to_pattern(num):
+def num_to_pattern(num: int) -> list[str]:
     """Take in an integer from 0 to 242 and return its unique pattern.
 
     Uses a ternary expansion to associate a pattern with each unique int ID,
@@ -92,14 +95,14 @@ def num_to_pattern(num):
         The pattern corresponding to this unique ID.
     """
     dct = {0: 'B', 1: 'Y', 2: 'G'}
-    pattern = ''
+    pattern = []
     for i in range(5):
         num, remainder = divmod(num, 3)
-        pattern += dct[remainder]
+        pattern.append(dct[remainder])
     return pattern
 
 
-def count_unique_by_row(a):
+def count_unique_by_row(a: npt.NDArray) -> npt.NDArray:
     """Give the number of unique entries rowwise in an array (helper function).
 
     Adapted from https://stackoverflow.com/a/28789027. The output puts the
@@ -125,18 +128,26 @@ def count_unique_by_row(a):
     return b
 
 
-def logistic(x, k=3.5, midpoint=3, L=1):
+def logistic(x: float,
+             k: float = 3.5,
+             midpoint: float = 3,
+             scale: float = 1) -> float:
     """Evaluates the logistic function with given parameters at x.
 
     The logistic function is given by
         L / (1 + e^(-k(x - midpoint)))
 
     Args:
+        x: The value at which to evaluate the logistic function
         k: A float determining the steepness of the sigmoid curve - higher
             values -> steeper curve
         midpoint: A float determining the midpoint of the curve (the x values
             for which logistic(x) = 0.5)
-        L: A float determining the scale of the sigmoid curve - L is the upper
-            bound of the function as x -> infinity
+        scale: A float determining the scale of the sigmoid curve - L is the
+            upper bound of the function as x -> infinity
+
+    Returns:
+        The value of the logistic function with parameters k, midpoint, and
+        scale evaluated at x.
     """
-    return L / (1 + math.exp((-1 * k) * (x - midpoint)))
+    return scale / (1 + math.exp((-1 * k) * (x - midpoint)))

@@ -16,14 +16,17 @@ Typical usage example:
 """
 from data import ANSWERS, ALL_WORDS
 from patterns_grid import load_pattern_grid, get_pattern_grid
-from util import count_unique_by_row, pattern_to_num, num_to_pattern
+from util import count_unique_by_row, pattern_to_num
 from pprint import pprint
 import numpy as np
 import time
 import operator as op
 
 
-def filter_words(guess, pattern, word_set=ANSWERS, patterns_dict=None):
+def filter_words(guess: str,
+                 pattern: list,
+                 word_set: list[str] = ANSWERS,
+                 patterns_dict: dict = None) -> list[str]:
     """Filter word_set to those words that match the given guess and pattern.
 
     Uses the pattern grid to find targets for which the given pattern would
@@ -50,7 +53,10 @@ def filter_words(guess, pattern, word_set=ANSWERS, patterns_dict=None):
     return list(np.array(word_set)[patterns == num])
 
 
-def rank_next_guess(word_set=ALL_WORDS, possible=ANSWERS, patterns_dict=None):
+def rank_next_guess(word_set: list[str] = ALL_WORDS,
+                    possible: list[str] = ANSWERS,
+                    patterns_dict: dict = None)\
+        -> list[tuple[str, float, float, float]]:
     """Ranks the possible next guesses from the word_set.
 
     Rank guesses by one of three metrics:
@@ -95,7 +101,8 @@ def rank_next_guess(word_set=ALL_WORDS, possible=ANSWERS, patterns_dict=None):
     return guess_ranks
 
 
-def play_wordle(answer_set=ANSWERS, patterns_dict=None):
+def play_wordle(answer_set: list[str] = ANSWERS,
+                patterns_dict: dict = None):
     """CLI to play a game of Wordle optimally, for use while playing Wordle.
 
     Gives feedback after each guess ranking possible next guesses, but lets the

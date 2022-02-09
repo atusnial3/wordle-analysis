@@ -26,10 +26,11 @@ from util import pattern_to_num
 from os.path import exists
 import itertools as it
 import numpy as np
+import numpy.typing as npt
 from tqdm import tqdm
 
 
-def generate_pattern_grid(filename='patterns_grid.npy'):
+def generate_pattern_grid(filename: str = 'patterns_grid.npy') -> npt.NDArray:
     """Generates the grid of patterns from the entire corpus.
 
     This function only needs to be called once as it saves the pattern grid to
@@ -52,7 +53,7 @@ def generate_pattern_grid(filename='patterns_grid.npy'):
     return patterns
 
 
-def load_pattern_grid(filename='patterns_grid.npy'):
+def load_pattern_grid(filename: str = 'patterns_grid.npy') -> dict:
     """Loads the pattern grid at runtime.
 
     If the file path given is not found, it (re)generates the grid calling the
@@ -77,7 +78,9 @@ def load_pattern_grid(filename='patterns_grid.npy'):
     return patterns_dict
 
 
-def get_pattern_grid(words1, words2, patterns_dict=None):
+def get_pattern_grid(words1: list[str],
+                     words2: list[str],
+                     patterns_dict: dict = None) -> npt.NDArray:
     """Gets the pattern grid for the cross product of words1 and words2.
 
     That is, it gets the subset of the grid PATTERNS_DCT['grid'] where the

@@ -27,9 +27,11 @@ from tqdm import tqdm
 import numpy as np
 
 
-def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS,
-                       filename='outputs/best_guess_grid.csv',
-                       patterns_dict=None):
+def best_starting_word(guesses: list[str] = ALL_WORDS,
+                       answers: list[str] = ANSWERS,
+                       filename: str = 'outputs/best_guess_grid.csv',
+                       patterns_dict: dict = None) \
+        -> list[tuple[str, float, float, float]]:
     """Ranks first guesses in Wordle by mean number of words eliminated.
 
     Computes the number of words left in the search space after each guess for
@@ -64,9 +66,10 @@ def best_starting_word(guesses=ALL_WORDS, answers=ANSWERS,
     return guess_ranks
 
 
-def best_second_word_by_pattern(first_guess='trace',
-                                filename='outputs/best_second_word_by_pattern.csv',
-                                patterns_dict=None):
+def best_second_word_by_pattern(first_guess: str = 'trace',
+                                filename: str = 'outputs/best_second_word_by_pattern.csv',
+                                patterns_dict: dict = None) \
+        -> list[tuple]:
     """Computes the best second guess for each pattern given some first guess.
 
     Also writes the list of words and patterns to a csv file with filename
@@ -78,7 +81,7 @@ def best_second_word_by_pattern(first_guess='trace',
     Returns:
         A list of tuples, where each tuple contains the guess, statistics for
         the guess, and the pattern corresponding to the guess. For example:
-        ('phons', 2.368, 5.0, 8, 'YYBBG') <- (guess, mean, max, num_solved, pattern)
+        ('phone', 2.368, 5.0, 8, 'YYBBG') <- (guess, mean, max, num_solved, pattern)
     """
     if patterns_dict is None:
         patterns_dict = load_pattern_grid()
@@ -93,12 +96,14 @@ def best_second_word_by_pattern(first_guess='trace',
             best_words.append((poss[0], pattern))
         else:
             best_words.append(('N/A', pattern))
-
     return best_words
 
 
-def wordle_solver(target='skill', verbose=False, answer_set=ANSWERS,
-                  first_guess='raise', patterns_dict=None):
+def wordle_solver(target: str = 'skill',
+                  verbose: bool = False,
+                  answer_set: list[str] = ANSWERS,
+                  first_guess: str = 'raise',
+                  patterns_dict: dict = None) -> int:
     """Automatically solves a game of Wordle for a given first guess and target.
 
     Args:
@@ -149,7 +154,7 @@ def main():
     for answer in tqdm(ANSWERS):
         n = wordle_solver(target=answer, first_guess=first_guess)
         nums.append(n)
-    print(f'Average Guesses: {np.mean(nums)}') #3.5732181425485963
+    print(f'Average Guesses: {np.mean(nums)}')  # 3.5732181425485963
     elapsed = time.time() - start_time
     print(f'{elapsed} seconds elapsed')
 

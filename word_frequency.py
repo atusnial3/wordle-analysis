@@ -13,16 +13,17 @@ from data import ALL_WORDS
 from os.path import exists
 from wordfreq import word_frequency, zipf_frequency
 from tqdm import tqdm
+from pprint import pprint
 import csv
 
-global WORD_FREQ_LIST
 
-
-def generate_word_frequencies(filename='outputs/word_frequencies.csv',
-                              k=3.5, midpoint=3, L=1):
+def generate_word_frequencies(filename: str = 'outputs/word_frequencies.csv',
+                              k: float = 3.5,
+                              midpoint: float = 3,
+                              scale: float = 1):
     """Generates a csv of the frequencies of all words in the corpus.
 
-    Gives both the actual frequency given by word_frequency, as well as the
+    Gives both the actual frequency given by word_frequency, and the
     logarithmic frequency from zipf_frequency. Also computes the logistic
     function of the zipf_frequencies using the given parameters.
 
@@ -30,46 +31,46 @@ def generate_word_frequencies(filename='outputs/word_frequencies.csv',
         filename: The path to the file to write to
         k: The steepness parameter for logistic function
         midpoint: The midpoint parameter for the logistic function
-        L: The scale parameter for the logistic function
+        scale: The scale parameter for the logistic function
     """
     with open(filename, 'w', newline='') as out:
         csv_out = csv.writer(out)
         csv_out.writerow(['Word', 'Freq', 'ZipF', 'Sigmoid'])
         for word in tqdm(ALL_WORDS):
-            freq = word_frequency(word)
-            zipf = zipf_frequency(word)
-            sigmoid = logistic(x=zipf, k=k, midpoint=midpoint, L=L)
+            freq = word_frequency(word, 'en')
+            zipf = zipf_frequency(word, 'en')
+            sigmoid = logistic(zipf, k, midpoint, scale)
             csv_out.writerow([word, freq, zipf, sigmoid])
 
 
-def load_word_frequencies(filename='outputs/word_frequencies.csv'):
+def load_word_frequencies(filename: str = 'outputs/word_frequencies.csv') \
+        -> list[dict[str, tuple[float, float, float]]]:
     """Loads word frequencies into a list of dictionaries from file at runtime.
 
-    Word frequencies are loaded into the global variable WORD_FREQ_LIST, which
+    Returns the list of dicts of words and their frequency measures, which
     is a list of dictionaries that looks like:
-    [
-    ,,6.4,0.999993209641302
-    their,0.00214,6.33,0.9999913245093576
-    there,0.00204,6.31,0.9999906954711627
-
-        {'word' : 'about', 'freq' : 0.00251, }
-    ]
+    [{'Word' : 'about', 'Frequency' : 0.00251, 'ZipF': 6.40, Sigmoid: .99932},
+     {'word' : 'their', 'Frequency' : 0.00214, 'ZipF': 6.33, Sigmoid: .99913},
+     {'word' : 'there', 'Frequency' : 0.00204, 'ZipF': 6.31, Sigmoid: .99907}]
 
     Args:
         filename: the path to the file to load from
+
+    Returns:
+        The list of dicts of words and frequency measures
     """
-    global WORD_FREQ_LIST
     if not exists(filename):
         generate_word_frequencies(filename=filename)
 
     with open(filename, 'r') as f:
         reader = csv.DictReader(f)
-        WORD_FREQ_LIST = list(reader)
+        freq_list = list(reader)
+        return freq_list
 
 
 def main():
-    load_word_frequencies()
-    print(WORD_FREQ_LIST)
+    freq_list = load_word_frequencies()
+    pprint(freq_list[:20])
 
 
 if __name__ == "__main__":

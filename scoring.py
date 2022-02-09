@@ -7,7 +7,7 @@ Functions:
 """
 
 
-def score_simple(guess, target):
+def score_simple(guess: str, target: str) -> list:
     """Simple scoring function, incorrect for words with double letters
 
     Used as a helper in score to optimize scoring speed for guesses without
@@ -33,7 +33,7 @@ def score_simple(guess, target):
     return pattern
 
 
-def score(guess, target):
+def score(guess: str, target: str) -> list:
     """Scores a guess the same way Wordle would score it.
 
     Returns the pattern of greens, yellows, and blacks that Wordle would output
