@@ -30,7 +30,7 @@ import numpy.typing as npt
 from tqdm import tqdm
 
 
-def generate_pattern_grid(filename: str = 'patterns_grid.npy') -> npt.NDArray:
+def generate_pattern_grid(filename: str = 'resources/patterns_grid.npy') -> npt.NDArray:
     """Generates the grid of patterns from the entire corpus.
 
     This function only needs to be called once as it saves the pattern grid to
@@ -44,6 +44,7 @@ def generate_pattern_grid(filename: str = 'patterns_grid.npy') -> npt.NDArray:
         array holds the pattern that Wordle would give if ANSWERS[i] is guessed
         and ANSWERS[j] is the target word.
     """
+    print('GENERATING PATTERN GRID')
     patterns = np.zeros((len(ALL_WORDS), len(ALL_WORDS)))
     for i, w1 in enumerate(tqdm(ALL_WORDS)):
         for j, w2 in enumerate(ALL_WORDS):
@@ -53,7 +54,7 @@ def generate_pattern_grid(filename: str = 'patterns_grid.npy') -> npt.NDArray:
     return patterns
 
 
-def load_pattern_grid(filename: str = 'patterns_grid.npy') -> dict:
+def load_pattern_grid(filename: str = 'resources/patterns_grid.npy') -> dict:
     """Loads the pattern grid at runtime.
 
     If the file path given is not found, it (re)generates the grid calling the

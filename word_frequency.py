@@ -13,11 +13,11 @@ from data import ALL_WORDS
 from os.path import exists
 from wordfreq import word_frequency, zipf_frequency
 from tqdm import tqdm
-from pprint import pprint
+import pandas as pd
 import csv
 
 
-def generate_word_frequencies(filename: str = 'outputs/word_frequencies.csv',
+def generate_word_frequencies(filename: str = 'resources/word_frequencies.csv',
                               k: float = 3.5,
                               midpoint: float = 3,
                               scale: float = 1):
@@ -43,7 +43,8 @@ def generate_word_frequencies(filename: str = 'outputs/word_frequencies.csv',
             csv_out.writerow([word, freq, zipf, sigmoid])
 
 
-def load_word_frequencies(filename: str = 'outputs/word_frequencies.csv') \
+def load_word_frequencies(filename: str = 'resources/word_frequencies.csv',
+                          load_format: str = 'df') \
         -> list[dict[str, tuple[float, float, float]]]:
     """Loads word frequencies into a list of dictionaries from file at runtime.
 
@@ -52,26 +53,30 @@ def load_word_frequencies(filename: str = 'outputs/word_frequencies.csv') \
     [{'Word' : 'about', 'Frequency' : 0.00251, 'ZipF': 6.40, Sigmoid: .99932},
      {'word' : 'their', 'Frequency' : 0.00214, 'ZipF': 6.33, Sigmoid: .99913},
      {'word' : 'there', 'Frequency' : 0.00204, 'ZipF': 6.31, Sigmoid: .99907}]
+    if load_format is dict, and a list of lists that looks like:
+    [['about', .00251, 6.40, .99932],
+     ['their', .00214, 6.33, .99913],
+     ['there', .00204, 6.31, .99907]] if load_format is list, and a pandas
+    DataFrame if load_format is 'df'
 
     Args:
         filename: the path to the file to load from
+        load_format: 'df', 'list' or 'dict' for the format of each row
+            in the output
 
     Returns:
         The list of dicts of words and frequency measures
     """
+    if load_format not in ['list', 'dict', 'df']:
+        raise ValueError('load_format must be either list or dict')
+
     if not exists(filename):
         generate_word_frequencies(filename=filename)
 
+    if load_format == 'df':
+        return pd.read_csv(filename)
+
     with open(filename, 'r') as f:
-        reader = csv.DictReader(f)
+        reader = csv.DictReader(f) if load_format == 'dict' else csv.reader(f)
         freq_list = list(reader)
         return freq_list
-
-
-def main():
-    freq_list = load_word_frequencies()
-    pprint(freq_list[:20])
-
-
-if __name__ == "__main__":
-    main()
