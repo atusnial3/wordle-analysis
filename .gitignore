@@ -2,6 +2,10 @@
 #########################
 outputs/
 
+# Project Generated Resources #
+#########################
+resources/
+
 # OS Generated Files #
 #########################
 __pycache__/
